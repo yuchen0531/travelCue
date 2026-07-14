@@ -1,4 +1,4 @@
-name: Travel LINE Reminder
+name: Travel LINE Scheduled Reminder
 
 on:
   workflow_dispatch:
