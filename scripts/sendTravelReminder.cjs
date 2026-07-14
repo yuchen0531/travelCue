@@ -17,7 +17,7 @@ function getServiceAccount() {
 
   try {
     return JSON.parse(rawValue);
-  } catch (error) {
+  } catch {
     throw new Error(
       "FIREBASE_SERVICE_ACCOUNT 不是有效的 JSON"
     );
@@ -39,13 +39,48 @@ function initializeFirebase() {
 function isLineUserId(value) {
   return (
     typeof value === "string" &&
-    /^U[a-zA-Z0-9]{20,}$/.test(value)
+    value.startsWith("U") &&
+    value.length >= 20
   );
+}
+
+function getTaiwanDateAfterDays(days) {
+  const todayText = new Intl.DateTimeFormat(
+    "en-CA",
+    {
+      timeZone: "Asia/Taipei",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }
+  ).format(new Date());
+
+  const [year, month, day] = todayText
+    .split("-")
+    .map(Number);
+
+  const targetDate = new Date(
+    Date.UTC(year, month - 1, day + days)
+  );
+
+  return targetDate.toISOString().slice(0, 10);
+}
+
+function getReminderMessage(days, travelName) {
+  if (days === 7) {
+    return `✈️ 距離「${travelName}」出發還有 7 天，記得確認護照、住宿與交通喔！`;
+  }
+
+  if (days === 3) {
+    return `🧳 距離「${travelName}」出發只剩 3 天，記得開始整理行李！`;
+  }
+
+  return `🎉 明天就是「${travelName}」的出發日，祝你旅途愉快！`;
 }
 
 async function pushLineMessage(
   lineUserId,
-  message,
+  text,
   channelAccessToken
 ) {
   const response = await fetch(
@@ -62,7 +97,7 @@ async function pushLineMessage(
         messages: [
           {
             type: "text",
-            text: message,
+            text,
           },
         ],
       }),
@@ -78,6 +113,104 @@ async function pushLineMessage(
   }
 }
 
+async function processReminder(
+  db,
+  days,
+  channelAccessToken
+) {
+  const targetDate = getTaiwanDateAfterDays(days);
+
+  console.log(
+    `查詢 ${targetDate} 出發的旅程，準備傳送 ${days} 天前提醒`
+  );
+
+  const snapshot = await db
+    .collection("trips")
+    .where("startDate", "==", targetDate)
+    .get();
+
+  if (snapshot.empty) {
+    console.log(
+      `${targetDate} 沒有符合的旅程`
+    );
+    return;
+  }
+
+  for (const tripDocument of snapshot.docs) {
+    const trip = tripDocument.data();
+
+    const travelName =
+      trip.travelName || "未命名旅程";
+
+    const memberIds = Array.isArray(trip.memberIds)
+      ? trip.memberIds
+      : [];
+
+    const validMemberIds = [
+      ...new Set(memberIds.filter(isLineUserId)),
+    ];
+
+    const message = getReminderMessage(
+      days,
+      travelName
+    );
+
+    for (const memberId of validMemberIds) {
+      /*
+       * 同一旅程、同一出發日期、同一提醒天數、
+       * 同一位成員，只會成功傳一次。
+       */
+      const reminderLogId = [
+        tripDocument.id,
+        targetDate,
+        `${days}days`,
+        memberId,
+      ].join("_");
+
+      const reminderLogRef = db
+        .collection("lineReminderLogs")
+        .doc(reminderLogId);
+
+      const reminderLogSnapshot =
+        await reminderLogRef.get();
+
+      if (reminderLogSnapshot.exists) {
+        console.log(
+          `${travelName} 的 ${days} 天提醒已傳過，略過`
+        );
+        continue;
+      }
+
+      try {
+        await pushLineMessage(
+          memberId,
+          message,
+          channelAccessToken
+        );
+
+        await reminderLogRef.set({
+          tripId: tripDocument.id,
+          travelName,
+          startDate: targetDate,
+          reminderDays: days,
+          memberId,
+          sentAt:
+            admin.firestore.FieldValue.serverTimestamp(),
+        });
+
+        console.log(
+          `已傳送「${travelName}」${days} 天前提醒`
+        );
+      } catch (error) {
+        console.error(
+          `傳送「${travelName}」給成員失敗：`,
+          error.message
+        );
+      }
+    }
+  }
+}
+
 async function main() {
   initializeFirebase();
 
@@ -87,66 +220,26 @@ async function main() {
 
   const db = admin.firestore();
 
-  console.log("開始讀取 Firestore trips 集合");
-
-  /*
-   * 第二階段只取一筆旅程測試。
-   * 之後第三階段才會改成查詢三天後的旅程。
-   */
-  const snapshot = await db
-    .collection("trips")
-    .limit(1)
-    .get();
-
-  if (snapshot.empty) {
-    console.log("Firestore 目前沒有旅程");
-    return;
-  }
-
-  const travelDocument = snapshot.docs[0];
-  const travel = travelDocument.data();
-
-  const travelName =
-    travel.travelName || "未命名旅程";
-
-  const memberIds = Array.isArray(travel.memberIds)
-    ? travel.memberIds
-    : [];
-
-  const validMemberIds = [
-    ...new Set(memberIds.filter(isLineUserId)),
-  ];
-
-  console.log(`測試旅程：${travelName}`);
-  console.log(`有效 LINE 成員數：${validMemberIds.length}`);
-
-  if (validMemberIds.length === 0) {
-    throw new Error(
-      "這筆旅程沒有有效的 LINE user ID。請檢查 memberIds 是否為 U 開頭的 ID。"
+  for (const days of [7, 3, 1]) {
+    await processReminder(
+      db,
+      days,
+      channelAccessToken
     );
   }
 
-  /*
-   * 第二階段只傳給第一位有效成員，
-   * 避免測試時一次傳給所有人。
-   */
-  const targetUserId = validMemberIds[0];
-
-  await pushLineMessage(
-    targetUserId,
-    `LINE 推播測試成功！「${travelName}」已成功連接 GitHub Actions。`,
-    channelAccessToken
-  );
-
-  console.log("LINE 測試訊息傳送完成");
+  console.log("7、3、1 天前提醒檢查完成");
 }
 
 main()
   .then(() => {
-    console.log("程式執行完成");
     process.exit(0);
   })
   .catch((error) => {
-    console.error("執行失敗：", error.message);
+    console.error(
+      "程式執行失敗：",
+      error
+    );
+
     process.exit(1);
   });
