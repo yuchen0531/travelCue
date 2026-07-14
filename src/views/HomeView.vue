@@ -386,7 +386,7 @@ export default {
    // 存使用者跟資料在localStorage
     this.userName = localStorage.getItem('liffDisplayName') || '使用者名稱';
     // alert('userName: ' + this.userName);
-    this.userID = localStorage.getItem('liffUserId') || '222222';
+    this.userID = localStorage.getItem('liffUserId') || '';
     const value = localStorage.getItem('travelList');
     if (!value) {
       this.fetchMyTravelList();
@@ -424,6 +424,7 @@ export default {
     async share () {
       const travel = this.travelList.find(item => item.id === this.activeID)
       console.log(travel)
+      alert(travel)
       const countries = travel.countries.length;
       const flexMessage = {
         type: "flex",
@@ -781,6 +782,7 @@ export default {
         // }
       };
       console.log('flexMessage', flexMessage);
+       alert(flexMessage)
       try {
         const result = await liff.shareTargetPicker([flexMessage]);
         if (result) {

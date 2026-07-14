@@ -53,7 +53,7 @@ export async function addSharedTravelItem(userId, travelItem) {
     const newItem = {
       ...travelItem,
       ownerId: userId,
-      memberIds: [userId, '222222'],             // 初始共用成員，至少包含自己
+      memberIds: [userId],             // 初始共用成員，至少包含自己
       createdAt: serverTimestamp(),    // 建議加時間戳
     };
 

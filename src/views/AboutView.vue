@@ -1,32 +1,10 @@
 <template>
-  <div class="addTravelCard relative flex justify-center items-center overflow-y-hidden  pt-[320px]" >
-    <!-- <div class="header pt-5 shadow-xl bg-linear">
-      <div class="flex items-center justify-center ml-3 mb-5 text-white">
-        <button class="absolute right-5 text-3xl" @click="$router.replace('/')">
-          <img src="../assets/img/home.png" width="25" alt="">
-        </button>
-        <p class="font-bold text-2xl">{{ travelItem.travelName }}</p>
-      </div>
-      <div class="relative">
-        <div class="flex overflow-x-auto pb-12">
-          <div :class="{'ml-3': index === 0}" class="mr-2" v-for="(item, index) in travelItem.dateList" :key="index" @click="currentDay = index">
-            <p class="text-nowrap font-bold text-center text-sm mb-1 " :class="{'text-[#D4A24C]': currentDay === index,'text-[#f9f9f985]': currentDay !== index}">Day {{ index + 1 }}</p>
-            <div class="flex justify-center items-center flex-col h-[92px] w-[68px] rounded-2xl font-bold" :class="{'text-[#D4A24C]': currentDay === index,'text-[#00000085]': currentDay !== index , 'bg-white': currentDay === index,'bg-[#eeeeee7f]': currentDay !== index}" >
-              <p class="">{{ monthFormat(dateFormat(item.date).getMonth()) }}</p>
-              <p class="text-2xl text-nowrap">{{ dateFormat(item.date).getDate() }}</p>
-              <p class="">{{ dayFormat(dateFormat(item.date).getDay()) }}</p>
-            </div>
-          </div >
-        </div>
-        <div class="flex items-center justify-center absolute bottom-2 w-full" @click="saveData()">
-          <p class="text-[#D4A24C] text-lg mr-2 tracking-widest font-bold">加入共用旅程</p>
-        </div>
-      </div>
-    </div> -->
+  <div class="addTravelCard relative flex justify-center items-center overflow-y-hidden  pt-[460px]" >
     <div class="w-full header shadow-xl fixed top-0 left-0" :style="{ backgroundImage: `url(${getCountryImage()})` }">
       <div class="bg-[#434343a1] pt-6 pb-12">
         <div class="flex flex-col items-center justify-center ml-5 mb-5 text-white">
-          <div class="absolute top-[20px] right-[15px] text-3xl z-20" @click="$router.replace('/')"><img src="../assets/img/home.png" width="20" alt=""></div>
+          <!-- <p class="absolute top-[20px] left-[15px] text-3xl z-20" @click="$router.replace('/')">⭠</p> -->
+          <div class="absolute top-[28px] right-[15px] z-20" @click="$router.replace('/')"><img src="../assets/img/home.png" width="20" alt=""></div>
           <p class="font-bold text-xl">{{ travelItem.travelName }}</p>
           <div class="my-2  flex items-start justify-start gap-2 text-white self-start">
             <svg
@@ -84,27 +62,52 @@
             </div>
           </div >
         </div>
-        <p class="text-[#D4A24C] text-lg tracking-widest font-bold text-center mt-2" @click="saveData()">加入共用旅程</p>
+        <!-- <p class="text-[#D4A24C] text-lg tracking-widest font-bold text-center mt-2" @click="saveData()">加入共用旅程</p> -->
+         <div class="w-[85%] mx-auto px-4 py-3 rounded-xl bg-[#ffffff96] mt-5 shareFrame flex flex-col items-center">
+          <div class="flex justify-around">
+            <div class="rounded-full bg-white flex w-[40px] h-[40px] p-1 border border-[#D4A441] items-center justify-center">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="22"
+                height="22"
+                viewBox="0 0 24 24"
+                fill="#D4A441"
+                stroke="#D4A441"
+                stroke-width="2.2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+                <path d="M22 21v-2a4 4 0 0 0-3-3.87" />
+                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+              </svg>
+            </div>
+            <div class="w-3/4">
+              <p class="text-[#161616] font-bold text-lg mb-1">好友邀請你一起規劃旅行</p>
+              <p class="text-[#2d2d2d] mb-2">加入後可以一同編輯行程，也可以存取在自己的旅行清單，馬上加入行程吧!!</p>
+            </div>
+          </div>
+          <p class="text-[#FFFFFF] bg-[#D4A441] w-fit rounded-2xl py-1 px-3 self-end" @click="saveData()">立即加入 > </p>
+         </div>
       </div>
     </div>
-    <div class="w-full content px-10 py-12 overflow-y-auto relative -mt-[20px] bg-[#ffffff] rounded-t-3xl" style="height: calc(100vh - 340px);">
-      <div v-for="(item, index) in travelItem.dateList[currentDay].locationList" class="mb-8" :key="index">
+    <div  class="w-full content px-10 py-12 overflow-y-auto relative -mt-[20px] bg-[#ffffff] rounded-t-3xl" style="height: calc(100vh - 440px);">
+      <div v-for="(item, index) in  (
+        travelItem.dateList[currentDay]
+          ? travelItem.dateList[currentDay].locationList
+          : []
+      )" class="mb-8" :key="index">
         <div class="flex text-[#767676]">
           <div class="flex flex-col justify-center items-center relative">
             <p class="startTime text-xl font-bold text-[#D4A24C]">{{ item.startTime }}</p>
           </div>
           <div class="w-full  locationList pl-4">
-            <p class="text-xl mb-3 font-bold  text-[#3b3b3b]"><span>{{ item.eventType == 'view' ? '🗺️' : item.eventType == 'food' ? '🍽️' : item.eventType == 'accommodation' ? '🏨' : item.eventType == 'transportation' ? '🚗' : '🆕' }}</span>{{ item.eventName}}</p>
-            <div class="text-lg flex items-center">
-              <img src="../assets/img/clock(1).png" width="16px" alt="">
-              <p class="ml-2">{{ item.startTime }} - {{ item.endTime }}</p>
-            </div>
-            <div class="text-lg flex items-center" @click="openMap(item.location)">
-              <img src="../assets/img/location(1).png" width="16px" alt="">
-              <p class="ml-2"><u>{{ item.location }}</u></p>
-            </div>
-            <p class="text-lg">交通方式: {{ item.transport }}</p>
-            <p class="text-lg"  v-if="item.cost > 0 " >💰 ${{ item.cost }}</p>
+            <p class="text-xl font-bold  text-[#3b3b3b]"><span>{{ item.eventType == 'view' ? '🗺️' : item.eventType == 'food' ? '🍽️' : item.eventType == 'accommodation' ? '🏨' : item.eventType == 'transportation' ? '🚗' : '🆕' }}</span> {{ item.eventName}}</p>
+            <p class="text-lg">🕐<span class="ml-2">{{ item.startTime }} - {{ item.endTime }}</span></p>
+            <p class="text-lg" @click="openMap(item.location)">📍<span class="ml-2"><u>{{ item.location }}</u></span></p>
+            <p class="text-lg" v-if="item.transport">🚆<span class="ml-2">{{ item.transport }}</span></p>
+            <p class="text-lg"  v-if="item.cost > 0 " >💰<span class="ml-2">${{ item.cost }}</span></p>
             <div v-if="item.notice" class="bg-[#faf0df] p-3 rounded-lg mt-2"> 
               <p class="text-lg" >📝{{ item.notice }}</p>
             </div>
@@ -116,7 +119,7 @@
   <div class="z-[99] model-frame" ref="model" v-if="noticeMsg !== ''">
     <div class="notice-model px-3 py-8 text-xl" >
       <p class="mb-5 font-bold text-center">{{ noticeMsg }}</p>
-      <p class="tracking-widest mx-auto border-2 rounded-lg bg-[#093857] text-white px-3 py-1 w-fit" @click="noticeMsg = ''">關閉</p>
+      <p class="tracking-widest mx-auto border-2 rounded-lg bg-[#093857] text-white px-3 py-1 w-fit" @click="closeBtn()">關閉</p>
     </div>
   </div>
   <Loading v-if="isLoading" />
@@ -146,12 +149,15 @@
         travelName: '',
         startDate: '',
         endDate: '',
-        dateList: []
+        dateList: [],
+        countries: [],
+        memberIds: []
       },
-      travelItemID: this.$route.query.id,
+      travelItemID: this.$route.query.tid,
       travelList: JSON.parse(localStorage.getItem('travelList')) || [],
       uid: '',
       tid: '',
+      goToCardBtn: false,
       countryMap: {
         JP: { name: '日本', continent: 'Asia', flag: '🇯🇵' },
         KR: { name: '韓國', continent: 'Asia', flag: '🇰🇷' },
@@ -233,16 +239,14 @@
       Loading,
     },
     created() {
-      console.log('99');
-      this.userID = localStorage.getItem('liffUserId') || '222222'
-      const urlParams = new URLSearchParams(window.location.search)
-      this.uid = urlParams.get('uid')
-      this.tid = urlParams.get('tid')
+      this.userID = localStorage.getItem('liffUserId') || '123123'
+      this.uid = this.$route.query.uid
+      this.tid = this.$route.query.tid
+      this.travelItemID = this.tid
       this.getList()
     },
     methods: {
       getCountryImage() {
-        console.log(this.travelItem.countries)
         const code = this.travelItem.countries && this.travelItem.countries.length
           ? this.travelItem.countries[0]
           : 'default';
@@ -253,8 +257,17 @@
         return this.countryMap[code]?.name || '';
       },
       async getList() {
-        console.log('107');
+        console.log('107', this.travelItemID);
         this.travelItem = await getOtherTravelList(this.tid)
+        for(let i =0 ;i< this.travelItem.memberIds.length; i++) {
+          if (this.travelItem.memberIds[i] === this.userID) {
+             this.$router.push({
+              path: '/travelcard',
+              query: { id: this.travelItemID }
+            });
+            return
+          }
+        }
       },
       openMap(locationName) {
         const googleMapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(locationName)}`
@@ -291,6 +304,7 @@
         return hours * 60 + minutes
       },
       async saveData() {
+        console.log('this.travelItem.memberIds', this.travelItem.memberIds)
         for(let i =0 ;i< this.travelItem.memberIds.length; i++) {
           if (this.travelItem.memberIds[i] === this.userID) {
             this.noticeMsg = '你已經加入過此旅程了!'
@@ -301,6 +315,19 @@
         const success = await joinTrip(this.tid, this.userID)
         this.isLoading = false
         this.noticeMsg = success ? '旅程加入成功!' : '旅程加入失敗!'
+        if(success){
+          this.goToCardBtn = true 
+        }
+      },
+      closeBtn(){
+        if(this.goToCardBtn) {
+          this.$router.push({
+            path: '/travelcard',
+            query: { id: this.travelItemID }
+          });
+        } else {
+          this.noticeMsg = ''
+        }
       }
     }
   }
@@ -382,6 +409,10 @@
   }
   .bg-linear{
     background: #3d4b71;
+  }
+  .shareFrame{
+    backdrop-filter: blur(14px);
+    border: 1px solid rgba(255,255,255,.25);
   }
   .model-frame {
     z-index: 99;

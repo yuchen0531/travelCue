@@ -40,6 +40,7 @@
         </button>
       </div>
       <div v-if="!inMessage" class="p-4 chatlist-content">
+        <div v-if="travelList.length === 0" class="text-center">目前沒有任何聊天列表</div>
         <div v-for="item in travelList" :key="item" class="mb-3 message-list p-2 rounded-lg border border-[#c3c3c3]" @click="showMessage(item)">
           <p class="font-bold text-lg text-[#4A587F]">{{ item.travelName }}</p>
           <p class=" text-[#616161]">{{ item.memberIds.length }}位成員</p>
@@ -105,7 +106,7 @@ export default {
     console.log('53');
    // 存使用者跟資料在localStorage
     this.userName = localStorage.getItem('liffDisplayName') || '使用者名稱';
-    this.userID = localStorage.getItem('liffUserId') || '222222';
+    this.userID = localStorage.getItem('liffUserId') || '';
     const value = localStorage.getItem('travelList');
     if (!value) {
       this.fetchMyTravelList();

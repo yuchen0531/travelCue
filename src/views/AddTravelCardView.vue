@@ -7,7 +7,7 @@
       <img src="../assets/img/header_bg.png" class="w-full absolute bottom-0 left-0" alt="">
     </div>
     <div class="addTravelCard bg-[#ffffff] rounded-t-3xl mt-[140px] relative flex justify-center items-start z-20">
-      <div class="addCard w-full flex flex-col justify-between p-5 overflow-y-auto" v-if="setName"  style="height: calc(100vh - 140px);">
+      <div class="addCard w-full flex flex-col justify-between p-5 overflow-y-auto" v-if="setName"  style="height: calc(100dvh - 140px);">
           <div>
             <div class="flex items-center justify-start mb-2">
               <img src="../assets/img/plane.png" width="28" alt="">
@@ -77,17 +77,17 @@
             <p class="text-sm">建議提前 2-3 個月開始規劃，這樣能獲得更好的機票和住宿價格！</p>
           </div>
           </div>
-          <div class="bg-linear text-white text-center text-lg font-bold rounded-xl p-3 w-full mt-5" @click="nextStep()">開始規劃行程</div>
+          <div class="bg-linear text-white text-center text-lg font-bold rounded-xl p-3 w-full my-5" @click="nextStep()">開始規劃行程</div>
 
       </div>
-      <div class="w-full" v-if="!setName"  style="height: calc(100vh - 140px);">
+      <div class="w-full" v-if="!setName && dateList.length > 0"  style="height: calc(100dvh - 140px);">
         <div class="header pt-5 shadow-lg">
           <div class="flex justify-between items-center px-3 mb-3">
             <div class="flex justify-start items-center">
               <p class="font-bold text-lg text-[#767676] mr-2">{{ travelName }}</p><img src="../assets/img/edit(1).png" width="20" height="20" alt="" @click="modifyNameModel = true">
               
             </div>
-            <button class="px-4 py-2 rounded-full bg-white/85 text-[#3d4b71] font-bold shadow-sm backdrop-blur text-nowrap" @click="finish()">
+            <button :disabled="isLoading" class="px-4 py-2 rounded-full bg-white/85 text-[#3d4b71] font-bold shadow-sm backdrop-blur text-nowrap" @click="finish()">
               保存
             </button>
           </div>
@@ -102,12 +102,12 @@
             </div >
           </div>
         </div>
-        <div class="content px-10 pt-6 pb-10 overflow-y-auto" style="height: calc(100vh - 340px);">
-          <div v-for="(item, index) in dateList[currentDay].locationList" class="mb-2" :key="index">
+        <div class="content px-10 pt-6 pb-10 overflow-y-auto" style="height: calc(100dvh - 340px);">
+          <div v-for="(item, index) in dateList[currentDay].locationList || []" class="mb-2" :key="item.eventId">
             <div class="flex text-[#767676]">
               <div class="flex flex-col justify-center items-center relative">
                 <p class="startTime text-xl">{{ item.startTime }}</p>
-                <div class="bg-[#73737399] p-2 rounded-xl mb-3" @click="edit(item)">
+                <!-- <div class="bg-[#73737399] p-2 rounded-xl mb-3" @click="edit(item)">
                   <svg  xmlns="http://www.w3.org/2000/svg"
                       width="20"
                       height="20"
@@ -142,26 +142,35 @@
                   <path d="M9 6V4h6v2"/>
 
                 </svg>
-              </div>
+              </div> -->
                 
               </div>
-              <div class="w-full py-2 locationList ml-4">
-                <p class="text-xl mb-3 font-bold  text-[#3b3b3b]"><span>{{ item.eventType == 'view' ? '🗺️' : item.eventType == 'food' ? '🍽️' : item.eventType == 'accommodation' ? '🏨' : item.eventType == 'transportation' ? '🚗' : '🆕' }}</span>{{ item.eventName}}</p>
+              <div class="w-full py-2 locationList ml-10">
+                <div class="flex items-center justify-between mb-3 ">
+                  <p class="text-xl font-bold  text-[#3b3b3b]"><span>{{ item.eventType == 'view' ? '🗺️' : item.eventType == 'food' ? '🍽️' : item.eventType == 'accommodation' ? '🏨' : item.eventType == 'transportation' ? '🚗' : '🆕' }}</span>{{ item.eventName}}</p>
+                  <div class="flex items-center justify-center bg-[#ffffffe0] rounded-full p-1" @click.stop="moreOption(item)">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="#3d4b71">
+                    <circle cx="5" cy="12" r="2"/>
+                    <circle cx="12" cy="12" r="2"/>
+                    <circle cx="19" cy="12" r="2"/>
+                  </svg>
+                  </div>
+                </div>
                 <div class="text-lg flex items-center">
-                  <img src="../assets/img/clock(1).png" width="16px" alt="">
+                  🕐
                   <p class="ml-2">{{ item.startTime }} - {{ item.endTime }}</p>
                 </div>
                 <div class="text-lg flex items-center">
-                  <img src="../assets/img/location(1).png" width="16px" alt="">
+                  📍
                   <p class="ml-2">{{ item.location }}</p>
                 </div>
-                <p class="text-lg">交通方式: {{ item.transport }}</p>
+                <p class="text-lg">🚆 {{ item.transport }}</p>
                 <p class="text-lg"  v-if="item.cost > 0 " >💰 ${{ item.cost }}</p>
-                <p class="text-lg" v-if="item.notice">備註: {{ item.notice }}</p>
+                <p class="text-lg" v-if="item.notice">📝 {{ item.notice }}</p>
               </div>
             </div>
           </div>
-          <button class="w-full rounded-xl bg-[#D4A24C] text-white font-bold py-3 shadow-sm"  @click="eventName = '';startTime = '';endTime = '';location = '';transport = '';notice = '';itemEditMode = false, showAddEventModel = true">
+          <button class="w-full rounded-xl bg-[#D4A24C] text-white font-bold py-3 shadow-sm"  @click="openAddEvent">
             ＋ 新增今日行程
           </button>
         </div>
@@ -173,7 +182,7 @@
       <div class="bg-[#4A587F] rounded-t-3xl p-3">
         <p class="text-xl text-white tracking-widest text-center">第{{ currentDay + 1 }}天</p>
       </div>
-      <div class="px-3 py-3 overflow-y-auto" style="max-height: calc(100vh - 90px);">
+      <div class="px-3 py-3 overflow-y-auto h-fit" style="max-height: calc(100dvh - 52px); overscroll-behavior: contain;">
         <div class="flex flex-col mb-2">
           <p class="text-l font-bold mb-1">🎯行程名稱</p>
           <input type="text" v-model="eventName" class="text-lg w-full h-10 border-b-2 p-2" placeholder="請輸入行程名稱">
@@ -199,25 +208,27 @@
             <input type="time" v-model="endTime" class="text-lg border-2 rounded-lg" >
           </div>
         </div>
-        <div class="flex flex-col mb-2">
-          <p class="text-l font-bold mb-1">🚗交通方式</p>
-          <input type="text" v-model="transport" class="text-lg w-full h-10 border-b-2 p-2" placeholder="請輸入交通方式">
+        <div class="flex mb-2 ">
+          <div class="flex flex-col w-1/2 mr-2">
+            <p class="text-l font-bold mb-1">🚗交通方式</p>
+            <input type="text" v-model="transport" class="text-lg w-full h-10 border-b-2 p-2" placeholder="請輸入交通方式">
+          </div>
+          <div class="flex flex-col w-1/2">
+            <p class="text-l font-bold mb-1">💰 花費(單位: 新台幣)</p>
+            <input type="number" v-model="cost" class="text-lg w-full h-10 border-b-2 p-2" placeholder="請輸入總花費">
+          </div>
         </div>
         <div class="flex flex-col mb-2">
           <p class="text-l font-bold mb-1">📍地點</p>
           <input type="text" v-model="location" class="text-lg w-full h-10 border-b-2 p-2" placeholder="請輸入地點">
         </div>
         <div class="flex flex-col mb-2">
-          <p class="text-l font-bold mb-1">💰 花費(單位: 新台幣)</p>
-          <input type="number" v-model="cost" class="text-lg w-full h-10 border-b-2 p-2" placeholder="請輸入總花費">
-        </div>
-        <div class="flex flex-col mb-2">
           <p class="text-l font-bold  mb-1">📝備註</p>
           <textarea name="" placeholder="備註..."  rows="3" v-model="notice" class="text-lg w-full border-2 rounded-lg p-2" id=""></textarea>
         </div>
-        <div class="text-lg flex justify-between items-center tracking-widest mt-5">
-          <p class="mb-2 rounded-lg bg-[#818181] text-white px-3 py-1 w-1/2 text-center mr-3" @click="itemEditMode = false, showAddEventModel = false">關閉</p>
-          <p class="mb-2 bg-linear text-white rounded-lg px-3 py-1 w-1/2 text-center" @click="addLocation()">{{ itemEditMode ? '💾修改':'✨添加' }}</p>
+        <div class="text-lg flex justify-between items-center tracking-widest my-5">
+          <p class="rounded-lg bg-[#818181] text-white px-3 py-1 w-1/2 text-center mr-3" @click="itemEditMode = false, showAddEventModel = false">關閉</p>
+          <p class="bg-linear text-white rounded-lg px-3 py-1 w-1/2 text-center" @click="addLocation()">{{ itemEditMode ? '💾修改':'✨添加' }}</p>
         </div>
       </div>
     </div>
@@ -228,7 +239,7 @@
     @click="showCountryPicker = false"
   >
     <div
-      class="bg-white rounded-t-3xl w-full h-[85vh] flex flex-col"
+      class="bg-white rounded-t-3xl w-full h-[85dvh] flex flex-col"
       @click.stop
     >
       <!-- Header -->
@@ -327,6 +338,43 @@
       </div>
     </div>
   </div>
+    <Transition name="bottom-sheet">
+    <div
+      v-if="isMoreOption"
+      class="fixed inset-0 z-[99] bg-black/40 flex items-end"
+      @click="isMoreOption = false; activeID = null"
+    >
+      <div
+        ref="model"
+        class="moreOption-model w-full p-5 text-xl flex flex-col items-center justify-center rounded-t-3xl bg-white"
+        @click.stop
+      >
+        <div class="w-12 h-1.5 bg-gray-300 rounded-full mx-auto mb-5"></div>
+
+        <div class="flex items-center justify-start w-full" @click.stop="edit()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+            viewBox="0 0 24 24" fill="none" stroke="#3d4b71"
+            stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 20h9"/>
+            <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/>
+          </svg>
+          <p class="ml-4 py-3 w-full font-bold">編輯行程</p>
+        </div>
+        <div class="flex items-center justify-start w-full"  @click="deleteItem()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+            viewBox="0 0 24 24" fill="none" stroke="#fd8f45"
+            stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="3 6 5 6 21 6"/>
+            <path d="M19 6l-1 14H6L5 6"/>
+            <path d="M10 11v6"/>
+            <path d="M14 11v6"/>
+            <path d="M9 6V4h6v2"/>
+          </svg>
+          <p class="ml-4 py-3 w-full text-[#fd8f45] font-bold">刪除行程</p>
+        </div>
+      </div>
+    </div>
+  </Transition>
   <Loading v-if="isLoading" />
 </template>
 
@@ -383,6 +431,7 @@ export default {
       userName: '',
       unsubscribeTravel: null,
       showCountryPicker: false,
+      activeID: null,
       continentList: [
         { key: 'Asia', name: '亞洲', icon: '🌏' },
         { key: 'Europe', name: '歐洲', icon: '🏰' },
@@ -393,6 +442,7 @@ export default {
       ],
       currentContinent: 'Asia',
       selectedCountries: [],
+      isMoreOption: false,
       countryOptions: [
         // ===== 亞洲 =====
         { code: 'JP', name: '日本', continent: 'Asia', flag: '🇯🇵' },
@@ -495,8 +545,19 @@ export default {
       this.unsubscribeTravel();
     }
   },
+  watch: {
+    showAddEventModel(newVal) {
+      if (newVal) {
+        document.body.style.overflow = 'hidden';
+        document.body.style.overscrollBehavior = 'none';
+      } else {
+        document.body.style.overflow = '';
+        document.body.style.overscrollBehavior = '';
+      }
+    }
+  },
   created() {
-    this.userID = localStorage.getItem('liffUserId') || '222222';
+    this.userID = localStorage.getItem('liffUserId') || '';
     this.userName = localStorage.getItem('liffDisplayName') || '使用者名稱'
     this.editMode = Boolean(this.$route.query.editMode);
     this.travelListId = this.$route.query.id;
@@ -511,6 +572,19 @@ export default {
     next();
   },
   methods: {
+    openAddEvent() {
+  this.eventName = '';
+  this.eventType = '';
+  this.startTime = '';
+  this.endTime = '';
+  this.location = '';
+  this.transport = '';
+  this.cost = '';
+  this.notice = '';
+  this.activeID = null;
+  this.itemEditMode = false;
+  this.showAddEventModel = true;
+},
     listenTravel() {
       this.isLoading = true;
 
@@ -595,24 +669,27 @@ export default {
       return null;
     },
     async saveData() {
-      // if (!liffUserId.value) {
-      //   message.value = "沒有使用者 ID，無法儲存資料。";
-      //   console.log('沒有使用者 ID，無法儲存資料。');
-      //   return;
-      // }
       this.isLoading = true;
-      console.log('598this.traveleList', this.traveleList);
-      const success = await addSharedTravelItem(
-        this.userID,
-        this.traveleList,
-      );
-      if (success) {
-        this.isFinish = true;
-        this.isLoading = false;
-        this.noticeMsg = '旅程新增成功!';
-      } else {
-        this.isLoading = false;
+
+      try {
+        const success = await addSharedTravelItem(
+          this.userID,
+          this.traveleList
+        );
+
+        if (success) {
+          this.isFinish = true;
+          this.noticeMsg = '旅程新增成功!';
+        } else {
+          this.isFinish = false;
+          this.noticeMsg = '旅程新增失敗!';
+        }
+      } catch (error) {
+        console.error('新增旅程失敗：', error);
+        this.isFinish = false;
         this.noticeMsg = '旅程新增失敗!';
+      } finally {
+        this.isLoading = false;
       }
     },
     async nextPage() {
@@ -622,10 +699,12 @@ export default {
       localStorage.setItem('travelList', JSON.stringify(travelList));
       this.$router.replace('/');
     },
-    edit(item) {
+    edit() {
+      console.log(this.activeID)
+      this.isMoreOption = false
       const locationList = this.dateList[this.currentDay].locationList;
 
-      const targetIndex = locationList.findIndex(e => e.eventId === item.eventId);
+      const targetIndex = locationList.findIndex(e => e.eventId === this.activeID);
 
       if (targetIndex !== -1) {
         const targetEvent = locationList[targetIndex];
@@ -644,23 +723,23 @@ export default {
         this.showAddEventModel = true;
       }
     },
-    deleteItem(item) {
+    deleteItem() {
       this.deleteMode = true;
-      this.deleteEventId = item.eventId;
       this.noticeMsg = '確定要刪除這個行程嗎？';
+      this.isMoreOption = false
     },
     confirmDel() {
       const locationList = this.dateList[this.currentDay].locationList;
-      const targetIndex = locationList.findIndex(e => e.eventId === this.deleteEventId);
+      const targetIndex = locationList.findIndex(e => e.eventId === this.activeID);
       if (targetIndex !== -1) {
         locationList.splice(targetIndex, 1);
         locationList.sort((a, b) => this.toMinutes(a.startTime) - this.toMinutes(b.startTime));
         console.log(this.dateList);
       } else {
-        console.warn('找不到對應的行程 eventId:', this.deleteEventId);
+        console.warn('找不到對應的行程 eventId:', this.activeID);
       }
       this.deleteMode = false;
-      this.deleteEventId = null;
+      this.activeID = null;
       this.noticeMsg = '';
     },
     dayFormat(dayNum) {
@@ -704,24 +783,22 @@ export default {
         this.noticeMsg = '結束時間必須晚於開始時間';
         return;
       }
-      console.log('day', this.day);
-      console.log('time', this.startTime);
-      console.log('location', this.location);
-      console.log('transport', this.transport);
-      console.log('notice', this.notice);
-      console.log(this.dateList[this.currentDay].locationList);
-      if(this.itemEditMode) {
+      if (this.itemEditMode) {
+        const originalItem =
+        this.dateList[this.currentDay].locationList[this.editIndex];
+
         this.dateList[this.currentDay].locationList[this.editIndex] = {
-          day: this.day,
-          eventName: this.eventName,
+          ...originalItem,
+          day: this.currentDay + 1,
+          eventName: this.eventName.trim(),
           startTime: this.startTime,
           endTime: this.endTime,
-          location: this.location,
-          transport: this.transport,
-          notice: this.notice,
+          location: this.location.trim(),
+          transport: this.transport.trim(),
+          notice: this.notice.trim(),
           eventType: this.eventType,
           cost: this.cost
-        }
+        };
       } else {
         this.dateList[this.currentDay].locationList.push({
           eventId: this.generateEventId(),
@@ -744,6 +821,7 @@ export default {
       this.notice = '';
       this.eventType = '';
       this.cost = '';
+      this.activeID = null;
       // console.log(this.locationList);
       this.dateList[this.currentDay].locationList = this.dateList[this.currentDay].locationList.sort((a, b) => {
         return this.toMinutes(a.startTime) - this.toMinutes(b.startTime);
@@ -788,8 +866,8 @@ export default {
         this.noticeMsg = '請填寫完整資訊';
         return;
       }
-      if (new Date(this.startDate) >= new Date(this.endDate)) {
-        this.noticeMsg = '結束時間不得早於開始時間';
+      if (new Date(this.startDate) > new Date(this.endDate)) {
+        this.noticeMsg = '結束日期不得早於開始日期';
         return;
       }
       this.traveleList = {
@@ -802,6 +880,7 @@ export default {
       this.setName = false;
     },
     finish () {
+      if (this.isLoading) return;
       this.traveleList.travelName = this.travelName;
       this.traveleList.dateList = this.dateList;
       if(this.editMode) {
@@ -823,6 +902,12 @@ export default {
       }
       this.dateList = dateList;
       console.log('dateList', this.dateList);
+    },
+    moreOption (item) {
+      console.log('758',item)
+      this.activeID = this.activeID === item.eventId ? null : item.eventId;
+      console.log('this.activeID',this.activeID)
+      this.isMoreOption = true
     },
   }
 };
@@ -920,7 +1005,8 @@ input[type="date"] {
   justify-content: center;
   align-items: center;
   width: 100%;
-  height: 100vh;
+  height: 100dvh;
+  min-height: 100svh;
   position: fixed;
   top: 0;
   right: 0;
@@ -951,5 +1037,28 @@ input[type="date"] {
     box-shadow: 0px 4px 20px rgba(0, 0, 0, 0.5);
     color: #676767;
   }
+}
+.bottom-sheet-enter-active,
+.bottom-sheet-leave-active {
+  transition: opacity 0.25s ease;
+}
+
+.bottom-sheet-enter-from,
+.bottom-sheet-leave-to {
+  opacity: 0;
+}
+
+.bottom-sheet-enter-from .moreOption-model,
+.bottom-sheet-leave-to .moreOption-model {
+  transform: translateY(100%);
+}
+
+.bottom-sheet-enter-to .moreOption-model,
+.bottom-sheet-leave-from .moreOption-model {
+  transform: translateY(0);
+}
+
+.moreOption-model {
+  transition: transform 0.25s ease;
 }
 </style>

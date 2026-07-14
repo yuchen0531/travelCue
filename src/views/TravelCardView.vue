@@ -223,7 +223,8 @@ export default {
   computed: {
   },
   created () {
-    console.log(this.$route.query.id);
+    console.log('226', this.$route.query.id);
+    console.log('227', this.$route.query);
     console.log(this.travelList);
     this.travelList.forEach((item, index) => {
       console.log(item.id);
@@ -406,7 +407,7 @@ export default {
                   text: `🔔 ${item.notice}`,
                   size: "sm",
                   margin: "md",
-                  color: "#d87f7f",
+                  color: "#D4A24C",
                   wrap: true
                 }
               ],
@@ -438,7 +439,7 @@ export default {
                       height: "14px",
                       width: "14px",
                       borderWidth: "medium",
-                      borderColor: "#d87f7f"
+                      borderColor: "#D4A24C"
                     },
                     { type: "filler" }
                   ],
@@ -450,7 +451,7 @@ export default {
                   gravity: "center",
                   flex: 4,
                   size: "md",
-                  color: "#d87f7f",
+                  color: "#D4A24C",
                   weight: "bold"
                 }
               ],
@@ -476,7 +477,7 @@ export default {
                           layout: "vertical",
                           contents: [],
                           width: "2px",
-                          backgroundColor: "#faeeee"
+                          backgroundColor: "#e7c282"
                         },
                         { type: "filler" }
                       ],
