@@ -1,9 +1,9 @@
-name: Travel LINE Scheduled Reminder
+name: Travel LINE Reminder
 
 on:
   workflow_dispatch:
   schedule:
-    - cron: "*/5 * * * *"
+    - cron: "7,17,27,37,47,57 * * * *"
 
 jobs:
   send-reminders:
