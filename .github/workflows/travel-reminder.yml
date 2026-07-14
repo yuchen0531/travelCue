@@ -1,7 +1,6 @@
 name: Travel Reminder Test
 
-on:
-  workflow_dispatch:
+on: [workflow_dispatch]
 
 jobs:
   read-firestore:
