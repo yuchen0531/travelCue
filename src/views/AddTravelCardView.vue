@@ -495,6 +495,7 @@ export default {
         { code: 'GR', name: '希臘', continent: 'Europe', flag: '🇬🇷' },
         { code: 'HR', name: '克羅埃西亞', continent: 'Europe', flag: '🇭🇷' },
         { code: 'SI', name: '斯洛維尼亞', continent: 'Europe', flag: '🇸🇮' },
+        { code: 'EE', name: '愛沙尼亞', continent: 'Europe', flag: '🇪🇪' },
 
         // ===== 北美 =====
         { code: 'US', name: '美國', continent: 'NorthAmerica', flag: '🇺🇸' },
