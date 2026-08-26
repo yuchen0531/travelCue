@@ -272,6 +272,7 @@ export default {
         AT: { name: '奧地利', continent: 'Europe', flag: '🇦🇹' },
         CZ: { name: '捷克', continent: 'Europe', flag: '🇨🇿' },
         SK: { name: '斯洛伐克', continent: 'Europe', flag: '🇸🇰' },
+        EE: { name: '愛沙尼亞', continent: 'Europe', flag: '🇪🇪' },
         HU: { name: '匈牙利', continent: 'Europe', flag: '🇭🇺' },
         PL: { name: '波蘭', continent: 'Europe', flag: '🇵🇱' },
         NL: { name: '荷蘭', continent: 'Europe', flag: '🇳🇱' },
