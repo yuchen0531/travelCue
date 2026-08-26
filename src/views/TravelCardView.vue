@@ -190,6 +190,7 @@ export default {
         GR: { name: '希臘', continent: 'Europe', flag: '🇬🇷' },
         HR: { name: '克羅埃西亞', continent: 'Europe', flag: '🇭🇷' },
         SI: { name: '斯洛維尼亞', continent: 'Europe', flag: '🇸🇮' },
+        EE: { name: '愛沙尼亞', continent: 'Europe', flag: '🇪🇪' },
 
         US: { name: '美國', continent: 'NorthAmerica', flag: '🇺🇸' },
         CA: { name: '加拿大', continent: 'NorthAmerica', flag: '🇨🇦' },
